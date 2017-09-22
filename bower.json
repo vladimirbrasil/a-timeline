@@ -13,6 +13,10 @@
   "resolutions": {
     "polymer": "^2.0.0"
   },
+  "authors": [
+    "vladimir bergier"
+  ],
+  "keywords": ["web-components", "polymer", "timeline"],
   "homepage": "https://github.com/vladimirbrasil/a-timeline",
-  "license": "Apache-2.0"
+  "license": "MIT"
 }
