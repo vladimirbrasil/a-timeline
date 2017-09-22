@@ -22,9 +22,21 @@
       <h3>Basic a-timeline demo</h3>
       <demo-snippet>
         <template>
-          <a-timeline></a-timeline>
+          <a-timeline id="demo"></a-timeline>
         </template>
       </demo-snippet>
     </div>
   </body>
+  <script>
+    const datetimes = [
+      '2017-08-11T14:17:00-03:00',
+      '2017-08-07T16:00:00-03:00',
+      '2017-08-23T15:22:00-03:00',
+      '2017-09-01T16:34:00-03:00',
+      '2017-08-17T15:22:00-03:00',
+      '2017-09-21T17:44:00-03:00',
+      '2017-09-13T14:48:00-03:00',
+    ];
+    document.getElementById('demo').datetimes = datetimes;
+  </script>
 </html>

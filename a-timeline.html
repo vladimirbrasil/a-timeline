@@ -5,9 +5,81 @@
     <style>
       :host {
         display: block;
+        --timeline-color: var(--default-primary-color, grey);
+      }
+
+      details {
+        color: var(--default-primary-color, grey);
+      }
+
+      #timeline {
+        width: 100%;
+        height: 20%;
+        min-height: 50px;
+        margin-bottom: 50px;
+      }
+
+      #line {
+        height: 6px;
+        width: 90%;
+        background: var(--timeline-color);
+        border-radius: 5px;
+        margin-left: 0;
+        margin: auto;
+        top: 50%;
+        /* transform: translateY(-50%); */
+        position: relative;
+      }
+
+      .circle {
+        box-sizing: border-box;
+        width: 20px;
+        height: 20px;
+        background: var(--timeline-color);
+        border-radius: 15px;
+        position: absolute;
+        top: -7px;
+        border: 3px solid var(--timeline-color);
+        cursor: pointer;
+      }
+      summary {
+        margin-top: 5px;
+      }
+      .day {
+        margin-top: 20px;
+      }
+      .detail {
+        margin-top: 0px;
+      }
+      .month {
+        margin-top: -75px;
       }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+
+    <div id="timeline">
+      <div id="line">            
+        <template is="dom-repeat" items="[[timelineData]]">
+          <!-- <details class="circle" style$="[[_computeTimelineItemStyle(item)]]"> -->
+          <div class="circle" style$="[[_computeTimelineItemStyle(item)]]">
+            <!-- <summary> -->
+            <div>
+              <div class="day">[[item.day]]</div>
+              <div class="detail">[[item.weekday]]</div>
+              <div class="month">[[item.newMonth]]</div>
+            </div>
+          </div>
+        </template>
+      </div>  <!-- end line -->
+    </div>  <!-- end timeline -->
+
+
+    <template is="dom-repeat" items="[[timelineData]]">
+      <p>[[_stringify(item)]]</p>
+    </template>
+    <hr>
+    <p>[[firstDate]]</p>
+    <p>[[totalDaysDiff]]</p>
+
   </template>
 
   <script>
@@ -23,12 +95,132 @@
       static get is() { return 'a-timeline'; }
       static get properties() {
         return {
-          prop1: {
+          datetimes: {
+            type: Array,
+            value: null,
+          },
+          sortedDatetimes: {
+            type: Array,
+            computed: 'computeSortedDatetimes(datetimes)',
+          },
+          firstDate: {
             type: String,
-            value: 'a-timeline'
-          }
+            computed: 'computeFirstDate(sortedDatetimes)',
+          },
+          totalDaysDiff: {
+            type: String,
+            computed: 'computeTotalDaysDiff(sortedDatetimes)',
+          },
+          timelineData: {
+            type: Array,
+            computed: 'computeTimelineData(sortedDatetimes, firstDate, totalDaysDiff)',
+          },
         };
       }
+
+      computeSortedDatetimes(datetimes) {
+        if (!datetimes || !datetimes[0]) return;
+        const sortedData = datetimes
+          .map(dt => this._toDateTime(dt))
+          .sort((a, b) => this._sortDates(a, b));
+        return sortedData;
+      }
+
+      computeTimelineData(sortedDatetimes, firstDate, totalDaysDiff) {
+        if (!sortedDatetimes || !sortedDatetimes[0] || !firstDate || !totalDaysDiff) return;
+        const timelineData = sortedDatetimes
+          .map((dt, index) => {
+            return {
+              datetime: dt,
+              weekday: this._getWeekDay(dt),
+              // time: this._getTime(dt),
+              daysDiff: firstDate ? this._computeDaysDiff(firstDate, dt) : null,
+              // formattedDate: this._formatDate(dt),
+              day: this._getDay(dt),
+              newMonth: this._computeNewMonth(sortedDatetimes, index) ? this._getFormattedMonth(dt) : null,
+            }
+          });
+        return timelineData;        
+      }
+
+      computeFirstDate(sortedDatetimes) {
+        if (!sortedDatetimes || !sortedDatetimes[0]) return;
+        return sortedDatetimes[0];
+        // const firstDateInMillisec = Math.min(...sortedDatetimes.map(dt => this._toDateTime(dt))); 
+        // return new Date(firstDateInMillisec);
+      }
+
+      computeTotalDaysDiff(sortedDatetimes) {
+        if (!sortedDatetimes || !sortedDatetimes[0]) return;
+        const firstDate = this.computeFirstDate(sortedDatetimes);
+        const lastDate = this._toDateTime(sortedDatetimes[sortedDatetimes.length-1]);
+
+        return this._computeDaysDiff(firstDate, lastDate);
+      }
+
+      _computeDaysDiff(firstDate, lastDate) {
+        if (!lastDate || !firstDate) return;        
+        const timeDiff = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        return daysDiff;
+      }
+
+      _computeTimelineItemStyle(item) {
+        return `left: ${this._calcRelativeDiff(item)}%;`;
+      }
+
+      _calcRelativeDiff(item) {
+        const relativeDiff = 100 * (item.daysDiff / this.totalDaysDiff);
+        return (relativeDiff == 100) ? 99 : relativeDiff;
+      }
+
+      _computeNewMonth(sortedDatetimes, index) {
+        if (index === 0) return true;
+        const datetime = sortedDatetimes[index];
+        const beforeDatetime = sortedDatetimes[index-1];
+        return datetime.getMonth() !== beforeDatetime.getMonth();
+      }
+
+      _getFormattedMonth(date) {
+        if (!date) return;
+        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
+        // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var options = { month: 'short' };
+        const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
+        return dateFormat.format(date);        
+      }
+
+      _toDateTime(date) {
+        return new Date(date);
+      }
+
+      _getDay(date) {
+        if (!date) return;
+        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
+        // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var options = { day: '2-digit' };
+        const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
+        return dateFormat.format(date);        
+      }
+
+      _getWeekDay(date) {
+        //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
+        const weekdayFormat = new Intl.DateTimeFormat(window.navigator.language, { 
+          weekday: 'short', 
+        });
+        return weekdayFormat.format(date).toLocaleLowerCase();
+      }
+
+      _sortDates(a, b) {
+        return new Date(a) - new Date(b);
+      }
+
+      _stringify(obj) {
+        return JSON.stringify(obj, null, 2);
+      }
+
+
+
     }
 
     window.customElements.define(ATimeline.is, ATimeline);
