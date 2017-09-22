@@ -47,7 +47,8 @@
         });
 
         it( 'first date is correctly calculated', function() {
-          expect( `${element.firstDate}`,  `firstDate` ).to.equal  ( 'Mon Aug 07 2017 16:00:00 GMT-0300 (BRT)' );
+          noTime = element.firstDate.toString().split('2017')[0].trim();
+          expect( `${noTime}`,  `firstDate` ).to.equal  ( 'Mon Aug 07' );
         });
 
         it( 'total days diff is correctly calculated', function() {

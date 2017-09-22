@@ -12,5 +12,7 @@
   },
   "resolutions": {
     "polymer": "^2.0.0"
-  }
+  },
+  "homepage": "https://github.com/vladimirbrasil/a-timeline",
+  "license": "Apache-2.0"
 }
