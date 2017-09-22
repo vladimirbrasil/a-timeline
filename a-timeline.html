@@ -1,15 +1,35 @@
 <link rel="import" href="../polymer/polymer-element.html">
 
+<!-- 
+`<a-timeline>` plots your dates.
+
+`<a-timeline>` accepts an array of datetimes.
+```html
+<a-timeline datetimes="[[datetimes]]"></a-timeline>
+```
+```js
+const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2017-09-13T14:48']
+];
+```
+
+Edit `<a-timeline>` color using `--timeline-color` style.
+```html
+<style>  
+  --timeline-color: blue;
+</style>
+```
+
+@element a-timeline
+@hero hero.svg
+@demo demo/index.html
+-->
+
 <dom-module id="a-timeline">
   <template>
     <style>
       :host {
         display: block;
         --timeline-color: var(--default-primary-color, grey);
-      }
-
-      details {
-        color: var(--default-primary-color, grey);
       }
 
       #timeline {
@@ -24,8 +44,8 @@
         width: 90%;
         background: var(--timeline-color);
         border-radius: 5px;
-        margin-left: 0;
         margin: auto;
+        margin-right: 40px;
         top: 50%;
         /* transform: translateY(-50%); */
         position: relative;
@@ -42,32 +62,43 @@
         border: 3px solid var(--timeline-color);
         cursor: pointer;
       }
+
+      details {
+        display: block;
+        color: var(--default-primary-color, grey);
+      }
+
       summary {
-        margin-top: 5px;
+        display: block;
+        margin-top: 0px;
       }
       .day {
-        margin-top: 20px;
+        display: block;
+        margin-top: 5px;
       }
       .detail {
+        display: block;
         margin-top: 0px;
       }
       .month {
-        margin-top: -75px;
+        position: absolute;
+        margin-top: -58px;
       }
     </style>
 
     <div id="timeline">
       <div id="line">            
         <template is="dom-repeat" items="[[timelineData]]">
-          <!-- <details class="circle" style$="[[_computeTimelineItemStyle(item)]]"> -->
-          <div class="circle" style$="[[_computeTimelineItemStyle(item)]]">
-            <!-- <summary> -->
-            <div>
+          <details class="circle" style$="[[_computeTimelineItemStyle(item)]]">
+          <!-- <div class="circle" style$="[[_computeTimelineItemStyle(item)]]"> -->
+            <summary>
+            <!-- <div> -->
               <div class="day">[[item.day]]</div>
-              <div class="detail">[[item.weekday]]</div>
               <div class="month">[[item.newMonth]]</div>
-            </div>
-          </div>
+            </summary>
+            <div class="detail">[[item.weekday]]</div>
+            <div class="detail">[[item.time]]</div>
+          </details>
         </template>
       </div>  <!-- end line -->
     </div>  <!-- end timeline -->
@@ -133,7 +164,7 @@
             return {
               datetime: dt,
               weekday: this._getWeekDay(dt),
-              // time: this._getTime(dt),
+              time: this._getTime(dt),
               daysDiff: firstDate ? this._computeDaysDiff(firstDate, dt) : null,
               // formattedDate: this._formatDate(dt),
               day: this._getDay(dt),
@@ -185,7 +216,7 @@
         if (!date) return;
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
         // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        var options = { month: 'short' };
+        var options = { month: 'long' };
         const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
         return dateFormat.format(date);        
       }
@@ -201,6 +232,10 @@
         var options = { day: '2-digit' };
         const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
         return dateFormat.format(date);        
+      }
+
+      _getTime(date) {
+        return date.toLocaleString('pt-BR').substring(11,16).trim();
       }
 
       _getWeekDay(date) {
