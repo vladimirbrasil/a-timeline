@@ -14,15 +14,17 @@
   <template>
     <script src="../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="a-timeline.html">
-    <style>
-    </style>
     <next-code-block></next-code-block>
   </template>
 </custom-element-demo>
 ```
 -->
 ```html
-<a-timeline></a-timeline>
+<a-timeline id="demo"></a-timeline>
+<script>
+  const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2017-09-13T14:48'];
+  document.getElementById('demo').datetimes = datetimes;
+</script>
 ```
 
 ## Usage
@@ -32,8 +34,7 @@
 <a-timeline datetimes="[[datetimes]]"></a-timeline>
 ```
 ```js
-const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2017-09-13T14:48']
-];
+const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2017-09-13T14:48'];
 ```
 
 Edit `<a-timeline>` color using `--timeline-color` style.
