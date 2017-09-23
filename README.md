@@ -4,7 +4,7 @@
 
 ## &lt;a-timeline&gt;
 
-Description
+## Description
 
 `<a-timeline>` plots your dates.
 
