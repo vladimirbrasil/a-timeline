@@ -4,7 +4,7 @@
 
 ## &lt;a-timeline&gt;
 
-## Description
+Description
 
 `<a-timeline>` plots your dates.
 
@@ -12,6 +12,9 @@
 ```
 <custom-element-demo>
   <template>
+    <style>
+      #demo { --timeline-color: green; }
+    </style>
     <script src="../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="a-timeline.html">
     <next-code-block></next-code-block>
@@ -39,8 +42,8 @@ const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2
 
 Edit `<a-timeline>` color using `--timeline-color` style.
 ```html
-<style>  
-  --timeline-color: blue;
+<style>
+  #demo { --timeline-color: green; }
 </style>
 ```
 
