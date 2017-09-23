@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/vladimirbrasil/a-timeline.svg?branch=master)](https://travis-ci.org/vladimirbrasil/a-timeline)
 [![Coverage Status](https://coveralls.io/repos/github/vladimirbrasil/a-timeline/badge.svg?branch=master)](https://coveralls.io/github/vladimirbrasil/a-timeline?branch=master)
 
-## &lt;a-timeline&gt;
-## Description
+**&lt;a-timeline&gt;**
+**Description**
 
 `<a-timeline>` plots your dates.
 
@@ -31,7 +31,7 @@
   document.getElementById('demo').datetimes = datetimes;
 </script>
 ```
-## Usage
+**Usage**
 
 `<a-timeline>` accepts an array of datetimes.
 ```html
@@ -50,20 +50,24 @@ Edit `<a-timeline>` color using `--timeline-color` style.
   }
 </style>
 ```
-## Contributing
+**Contributing**
 
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
-## History
-### September 22th
+
+**History**
+
+**September 22th**
 First version.
-## Credits
+
+**Credits**
 
 Vladimir Bergier Dietrichkeit
-## License  
+
+**License**
 
     This software is licensed under the MIT License, quoted below.
 
