@@ -14,7 +14,10 @@ const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2
 Edit `<a-timeline>` color using `--timeline-color` style.
 ```html
 <style>  
-  --timeline-color: blue;
+  a-timeline { 
+    --timeline-color: green; 
+    --timeline-text-color: grey; 
+  }
 </style>
 ```
 
@@ -29,6 +32,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       :host {
         display: block;
         --timeline-color: var(--default-primary-color, grey);
+        --timeline-text-color: var(--default-primary-color, grey);
       }
 
       #timeline {
@@ -83,6 +87,9 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         position: absolute;
         margin-top: -58px;
       }
+      .text {
+        color: var(--timeline-text-color);
+      }
     </style>
 
     <div id="timeline">
@@ -92,11 +99,11 @@ Edit `<a-timeline>` color using `--timeline-color` style.
           <!-- <div class="circle" style$="[[_computeTimelineItemStyle(item)]]"> -->
             <summary>
             <!-- <div> -->
-              <div class="day">[[item.day]]</div>
-              <div class="month">[[item.newMonth]]</div>
+              <div class="text day">[[item.day]]</div>
+              <div class="text month">[[item.newMonth]]</div>
             </summary>
-            <div class="detail">[[item.weekday]]</div>
-            <div class="detail">[[item.time]]</div>
+            <div class="text detail">[[item.weekday]]</div>
+            <div class="text detail">[[item.time]]</div>
           </details>
         </template>
       </div>  <!-- end line -->
