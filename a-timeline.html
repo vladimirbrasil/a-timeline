@@ -125,6 +125,9 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       static get is() { return 'a-timeline'; }
       static get properties() {
         return {
+          /**
+          * Array of datetimes to be plotted.
+          */
           datetimes: {
             type: Array,
             value: null,
