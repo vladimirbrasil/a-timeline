@@ -201,9 +201,15 @@ Edit `<a-timeline>` color using `--timeline-color` style.
 
       _computeDaysDiff(firstDate, lastDate) {
         if (!lastDate || !firstDate) return;        
-        const timeDiff = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const notimeFirstDate = this._removeTime(firstDate);
+        const notimeLastDate = this._removeTime(lastDate);
+        const timeDiff = Math.abs((new Date(notimeLastDate)).getTime() - (new Date(notimeFirstDate)).getTime());
         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
         return daysDiff;
+      }
+
+      _removeTime(datetime) {
+        return new Date(datetime.getFullYear(), datetime.getMonth(), datetime.getDate());
       }
 
       _computeTimelineItemStyle(item) {
