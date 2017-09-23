@@ -3,7 +3,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/vladimirbrasil/a-timeline/badge.svg?branch=master)](https://coveralls.io/github/vladimirbrasil/a-timeline?branch=master)
 
 ## &lt;a-timeline&gt;
-
 ## Description
 
 `<a-timeline>` plots your dates.
@@ -29,7 +28,6 @@
   document.getElementById('demo').datetimes = datetimes;
 </script>
 ```
-
 ## Usage
 
 `<a-timeline>` accepts an array of datetimes.
@@ -46,7 +44,6 @@ Edit `<a-timeline>` color using `--timeline-color` style.
   #demo { --timeline-color: green; }
 </style>
 ```
-
 ## Contributing
 
 1. Fork it!
@@ -54,16 +51,12 @@ Edit `<a-timeline>` color using `--timeline-color` style.
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
-
 ## History
-
 ### September 22th
 First version.
-
 ## Credits
 
 Vladimir Bergier Dietrichkeit
-
 ## License  
 
     This software is licensed under the MIT License, quoted below.
