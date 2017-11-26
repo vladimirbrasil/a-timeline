@@ -35,6 +35,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         @apply --timeline-mixin;
         --timeline-color: var(--default-primary-color, grey);
         --timeline-text-color: var(--default-primary-color, grey);
+        --timeline-main-color: var(--dark-primary-color, '#4286f4');
+        --timeline-light-color: var(--light-primary-color, '#d6e5ff');
       }
 
       #timeline {
@@ -141,11 +143,11 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         //colors
         let mainColor, lightMainColor;
         if (ShadyCSS) {
-          mainColor = ShadyCSS.getComputedStyleValue(this, '--dark-primary-color');
-          lightMainColor = ShadyCSS.getComputedStyleValue(this, '--light-primary-color');
+          mainColor = ShadyCSS.getComputedStyleValue(this, '--timeline-main-color');
+          lightMainColor = ShadyCSS.getComputedStyleValue(this, '--timeline-light-color');
         } else {
-          mainColor = getComputedStyle(this).getPropertyValue('--dark-primary-color');
-          lightMainColor = getComputedStyle(this).getPropertyValue('--light-primary-color');
+          mainColor = getComputedStyle(this).getPropertyValue('--timeline-main-color');
+          lightMainColor = getComputedStyle(this).getPropertyValue('--timeline-light-color');
         }        
         const dataColor = mainColor; //'#4286f4'; 
         const lightColor = lightMainColor; //'#d6e5ff';
