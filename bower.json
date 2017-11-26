@@ -3,7 +3,8 @@
   "description": "A timeline to display dates",
   "main": "a-timeline.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0"
+    "polymer": "Polymer/polymer#^2.0.0",
+    "google-chart": "GoogleWebComponents/google-chart#^2.0.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
@@ -16,7 +17,11 @@
   "authors": [
     "vladimir bergier"
   ],
-  "keywords": ["web-components", "polymer", "timeline"],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "timeline"
+  ],
   "homepage": "https://github.com/vladimirbrasil/a-timeline",
   "license": "MIT"
 }
