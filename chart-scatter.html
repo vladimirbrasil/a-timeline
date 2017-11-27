@@ -1,0 +1,158 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+<dom-module id="chart-scatter">
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply --chart-scatter-mixin;
+        --chart-scatter-text-color: var(--default-primary-color, grey);
+        --chart-scatter-main-color: var(--dark-primary-color, '#4286f4');
+        --chart-scatter-light-color: var(--light-primary-color, '#d6e5ff');
+      }
+
+      div {
+        margin: 5px 0;
+      }
+
+      #scatter_chart_div {
+        width: 100%;
+      }
+      @media screen and (min-width: 1200px) {
+        #scatter_chart_div, #scatter_chart_div {
+          width: 1200px;
+        }
+      }
+    </style>
+
+    <div id="expand">
+      <paper-toggle-button checked="{{expandChart}}">Expandir</paper-toggle-button>
+    </div>
+    <div id="scatter_chart_div"></div>      
+
+  </template>
+
+  <script>
+    class ChartScatter extends Polymer.Element {
+      static get is() { return 'chart-scatter'; }
+      static get observers() {
+        return [
+          'dataLoaded(chartRows, chartMainStyles, expandChart)',
+        ];
+      }
+      static get properties() {
+        return {
+          timelineData: {
+            type: Array,
+          },
+          chartMainStyles: {
+            type: Object,
+          },
+          chartRows: {
+            type: Array,
+            computed: 'computeChartRows(timelineData)',
+          },
+        };
+      }
+
+      expandChartChanged(expandChart) {
+        this.chartMainStyles.height
+      }
+
+      dataLoaded(chartRows, chartMainStyles, expandChart) {
+        if (!chartRows || !chartRows[0] || !chartMainStyles) return
+
+        google.charts.load('current', {'packages':['scatter']});
+        google.charts.setOnLoadCallback(() => {
+
+          let data, options;
+          ({ data, options } = this.prepareChart(chartRows, chartMainStyles, expandChart));
+
+          var chart = new google.charts.Scatter(this.$.scatter_chart_div);
+          chart.draw(data, google.charts.Scatter.convertOptions(options));
+        });
+      }
+
+      prepareChart(chartRows, chartMainStyles, expandChart) {
+        // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
+        let data = new google.visualization.DataTable();
+        data.addColumn({ type: 'date', id: 'Date' });
+        data.addColumn({ type: 'timeofday', id: 'Time' });
+
+        let chartWidth, dataColor;
+        ({ chartWidth, dataColor } = chartMainStyles);
+
+        let options = {
+          chart: {
+            // title: 'Frequency',
+            // subtitle: 'and time'
+          },
+          colors:[dataColor], 
+          // width: 300,         
+          // height: 400,
+          series: {
+            0: {axis: 'time'},
+          },
+          axes: {
+            y: {
+              // 'time': {label: 'Time'},
+            }
+          },
+        };
+
+        options.height = expandChart ? 400 : 70;
+
+        const rows = chartRows;
+        console.log(rows);
+        data.addRows(rows);
+
+
+        return { data, options };
+      }
+
+
+      computeChartRows(timelineData) {
+        if (!timelineData || !timelineData[0]) return;
+        const rows = this.timelineData
+          .map((tdata, index) => [ 
+            new Date(tdata.datetime), 
+            this._timeOfDay(tdata.datetime)
+            // `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
+          ]);
+
+        console.log(JSON.stringify(rows));
+        return rows;
+      }
+
+      _getTime(date) {
+        return date.toLocaleString('pt-BR').substring(11,16).trim();
+      }
+
+      _timeOfDay(datetime) {
+        //timeOfDay needs timezone correction (bug!)
+        const plusTimezoneDate = addTimezone(datetime);
+
+        // console.log(plusTimezoneDate, time);
+        const time = this._getTime(plusTimezoneDate);
+
+        //now format time already corrected with timezone
+        var hoursMinutes = time.split(/[.:]/);
+        var hours = parseInt(hoursMinutes[0], 10);
+        var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
+        console.log([ hours, minutes, 0 ])
+        return [ hours, minutes, 0 ];
+
+        function addTimezone(datetime) {
+          const d = new Date(datetime);
+          const timezone = d.getTimezoneOffset();
+          return new Date(d.getTime() + timezone * 60 * 1000);
+        }
+      }
+
+    }
+
+    window.customElements.define(ChartScatter.is, ChartScatter)
+  </script>
+</dom-module>

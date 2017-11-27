@@ -1,0 +1,168 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+<dom-module id="chart-calendar">
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply --chart-calendar-mixin;
+        --chart-calendar-text-color: var(--default-primary-color, grey);
+        --chart-calendar-main-color: var(--dark-primary-color, '#4286f4');
+        --chart-calendar-light-color: var(--light-primary-color, '#d6e5ff');
+      }
+
+      div {
+        margin: 5px 0;
+      }
+      
+      #calendar_chart_div {
+        width: 100%;
+      }
+      @media screen and (min-width: 1200px) {
+        #calendar_chart_div, #scatter_chart_div {
+          width: 1200px;
+        }
+      }
+    </style>
+
+    <div id="calendar_chart_div"></div>      
+
+  </template>
+
+  <script>
+    class ChartCalendar extends Polymer.Element {
+      static get is() { return 'chart-calendar'; }
+      static get observers() {
+        return [
+          'dataLoaded(chartRows, chartMainStyles)'
+        ];
+      }
+      static get properties() {
+        return {
+          timelineData: {
+            type: Array,
+          },
+          chartMainStyles: {
+            type: Object,
+          },
+          chartRows: {
+            type: Array,
+            computed: 'computeChartRows(timelineData)',
+          },
+          years: {
+            type: Number,
+            computed: 'computeYears(timelineData)',
+          },
+        };
+      }
+
+      computeYears(timelineData) {
+        const years = timelineData.map((tdata) => tdata.datetime.getFullYear());
+        console.log(years);
+        const firstYear = Math.min(...years);
+        const lastYear = Math.max(...years);
+        console.log(lastYear - firstYear);
+        return 1 + lastYear - firstYear;
+      }
+
+      dataLoaded(chartRows, chartMainStyles) {
+        if (!chartRows || !chartRows[0] || !chartMainStyles) return
+
+        google.charts.load('current', {'packages':['calendar']});
+        google.charts.setOnLoadCallback(() => {
+
+          let data, options;
+
+          ({ data, options } = this.prepareChart(chartRows, chartMainStyles));
+          var chart = new google.visualization.Calendar(this.$.calendar_chart_div);
+          chart.draw(data, options);        
+        });
+      }
+
+      computeChartDimensions(chartWidth) {
+        const calendarWidthAdjustFactor = 0.95;
+        const cellSize = Math.round((calendarWidthAdjustFactor * chartWidth - 20.3)/55.8);
+        const calendarHeightPerYear = (17.9 * cellSize + 29.9)/2;
+        const calendarHeight = 1.1 * (this.years * calendarHeightPerYear);
+        return {cellSize, calendarHeight};
+      }
+
+      prepareChart(chartRows, chartMainStyles) {
+        // https://developers.google.com/chart/interactive/docs/gallery/calendar
+        let data = new google.visualization.DataTable();
+        data.addColumn({ type: 'date', id: 'Date' });
+        data.addColumn({ type: 'number', id: 'Time scale' });
+        data.addColumn({ type: 'string', role: 'tooltip', id: 'Time' });
+
+        const rows = chartRows;
+        data.addRows(rows);
+
+        let dataColor, lightColor, chartWidth;
+        ({ dataColor, lightColor, chartWidth } = chartMainStyles);
+
+        const noDataBackgroundColor = '#fff';
+
+        let cellSize, calendarHeight;
+        ({cellSize, calendarHeight} = this.computeChartDimensions(chartWidth));
+
+        let options = {
+          // title: "Dias da semana",
+          // height: 350,
+          // width: 1200,
+          /*
+          16 - 908 317
+          15 - 860 297
+          14 - 804 281
+          09 - 521 191
+          calendarWidth = 55.8*cellSize + 20.3
+          cellSize = (calendarWidth - 20.3)/55.8 
+          calendarHeight = 17.9*cellSize + 29.9
+          */
+          width: chartWidth,
+          height: calendarHeight,
+          calendar: { cellSize: cellSize }, 
+          legend: 'none',
+          colorAxis: {
+            minValue: 0, 
+            colors: [dataColor, dataColor]
+          },
+          noDataPattern: {
+            backgroundColor: noDataBackgroundColor,
+            color: lightColor,
+          }          
+        };
+        console.log(this.chartMainStyles)
+        console.log(data, options)
+        return { data, options };
+      }
+
+      computeChartRows(timelineData) {
+        if (!timelineData || !timelineData[0]) return;
+        const rows = this.timelineData
+        .map((tdata, index) => [ 
+          new Date(tdata.datetime), 
+          this._timeToNumberScale(tdata.time),
+          `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
+        ]);
+        // console.log(JSON.stringify(rows));
+        return rows;
+      }
+
+      _getTime(date) {
+        return date.toLocaleString('pt-BR').substring(11,16).trim();
+      }
+
+      _timeToNumberScale(time) {
+        var hoursMinutes = time.split(/[.:]/);
+        var hours = parseInt(hoursMinutes[0], 10);
+        var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
+        // return parseFloat(`${hours}.${minutes}`);        
+        return hours + minutes / 60;        
+      }
+
+    }
+
+    window.customElements.define(ChartCalendar.is, ChartCalendar);
+  </script>
+</dom-module>

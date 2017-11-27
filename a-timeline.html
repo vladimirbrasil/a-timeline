@@ -1,6 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+<link rel="import" href="chart-calendar.html">
+<link rel="import" href="chart-scatter.html">
 <!-- 
 `<a-timeline>` plots your dates.
 
@@ -35,8 +37,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         @apply --timeline-mixin;
         --timeline-color: var(--default-primary-color, grey);
         --timeline-text-color: var(--default-primary-color, grey);
-        --timeline-main-color: var(--dark-primary-color, '#4286f4');
-        --timeline-light-color: var(--light-primary-color, '#d6e5ff');
+        --timeline-main-color: var(--dark-primary-color, #4286f4);
+        --timeline-light-color: var(--light-primary-color, #d6e5ff);
       }
 
       #timeline {
@@ -47,21 +49,25 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       }
 
       #calendar_chart_div, #scatter_chart_div {
+        width: 100%;
         /* width: 90%; 
         height: 20%; */
         /* width: 900px; 
         height: 500px; */
       }
-      #scatter_chart_div {
-        /* width: 900px; 
-        height: 500px; */
+      @media screen and (min-width: 1200px) {
+        #calendar_chart_div, #scatter_chart_div {
+          width: 1200px;
+        }
       }
     </style>
 
     <div id="timeline">
       <!-- [[jsonStringify(timelineData)]] -->
-      <div id="scatter_chart_div"></div>      
-      <div id="calendar_chart_div"></div>      
+      <!-- <div id="scatter_chart_div"></div>   -->
+      <chart-scatter chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-scatter>    
+      <chart-calendar chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-calendar>    
+      <!-- <div id="calendar_chart_div"></div>       -->
     </div>
     <!-- <div id="timeline">
       <div id="line">            
@@ -84,13 +90,13 @@ Edit `<a-timeline>` color using `--timeline-color` style.
 
   <script>
     /**
-     * `a-timeline`
-     * A timeline to display dates
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
+    * `a-timeline`
+    * A timeline to display dates
+    *
+    * @customElement
+    * @polymer
+    * @demo demo/index.html
+    */
     class ATimeline extends Polymer.Element {
       static get is() { return 'a-timeline'; }
       static get observers() {
@@ -140,6 +146,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         // dimensions
         const chartWidth = (hostWidth > 1200) ? 1200 : Math.round(hostWidth);
 
+
         //colors
         let mainColor, lightMainColor;
         if (ShadyCSS) {
@@ -148,21 +155,10 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         } else {
           mainColor = getComputedStyle(this).getPropertyValue('--timeline-main-color');
           lightMainColor = getComputedStyle(this).getPropertyValue('--timeline-light-color');
-        }        
+        }
         const dataColor = mainColor; //'#4286f4'; 
         const lightColor = lightMainColor; //'#d6e5ff';
-        return {
-          chartWidth: chartWidth,
-          dataColor: dataColor,
-
-          calendarWidthAdjustFactor: 0.95,
-          calendarWidth: chartWidth,
-          calendarDataColor: dataColor,
-          noDataColor: lightColor,
-          noDataBackgroundColor: '#fff',
-
-          scatterWidth: chartWidth,
-        };
+        return { chartWidth, dataColor, lightColor };
       }
 
       computeTimelineData(datetimes) {
@@ -182,117 +178,118 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         return timelineData;        
       }
 
-      dataLoaded(timelineData, chartMainStyles) {
-        if (!timelineData || !chartMainStyles) return
-        // this._buildMondaysData(timelineData);
-        // this.computeScatterChartRowsWithMondays(timelineData);
-        // return
+      // dataLoaded(timelineData, chartMainStyles) {
+      //   if (!timelineData || !chartMainStyles) return
+      //   // this._buildMondaysData(timelineData);
+      //   // this.computeScatterChartRowsWithMondays(timelineData);
+      //   // return
 
-        google.charts.load('current', {'packages':['corechart', 'calendar', 'scatter']});
-        google.charts.setOnLoadCallback(() => {
+      //   // google.charts.load('current', {'packages':['corechart', 'calendar', 'scatter']});
+      //   // google.charts.setOnLoadCallback(() => {
 
-          let data, options;
-          // ({ data, options } = this.prepareTraditionalScatterChart());
-          // var chart = new google.visualization.ScatterChart(this.$.scatter_chart_div);
-          // chart.draw(data, options); 
+      //   //   let data, options;
+      //   //   // ({ data, options } = this.prepareTraditionalScatterChart());
+      //   //   // var chart = new google.visualization.ScatterChart(this.$.scatter_chart_div);
+      //   //   // chart.draw(data, options); 
 
-          ({ data, options } = this.prepareScatterChart());
-          var chart = new google.charts.Scatter(this.$.scatter_chart_div);
-          chart.draw(data, google.charts.Scatter.convertOptions(options));        
+      //   //   // ({ data, options } = this.prepareScatterChart());
+      //   //   // var chart = new google.charts.Scatter(this.$.scatter_chart_div);
+      //   //   // chart.draw(data, google.charts.Scatter.convertOptions(options));        
 
-          ({ data, options } = this.prepareCalendarChart());
-          var chart = new google.visualization.Calendar(this.$.calendar_chart_div);
-          chart.draw(data, options);        
+      //   //   // ({ data, options } = this.prepareCalendarChart());
+      //   //   // var chart = new google.visualization.Calendar(this.$.calendar_chart_div);
+      //   //   // chart.draw(data, options);        
 
 
-        });
-        // this.drawChart();
-      }
+      //   // });
+      //   // this.drawChart();
+      // }
 
-      prepareCalendarChart() {
-        // https://developers.google.com/chart/interactive/docs/gallery/calendar
-        let data = new google.visualization.DataTable();
-        data.addColumn({ type: 'date', id: 'Date' });
-        data.addColumn({ type: 'number', id: 'Time scale' });
-        data.addColumn({ type: 'string', role: 'tooltip', id: 'Time' });
+      // prepareCalendarChart() {
+      //   // https://developers.google.com/chart/interactive/docs/gallery/calendar
+      //   let data = new google.visualization.DataTable();
+      //   data.addColumn({ type: 'date', id: 'Date' });
+      //   data.addColumn({ type: 'number', id: 'Time scale' });
+      //   data.addColumn({ type: 'string', role: 'tooltip', id: 'Time' });
 
-        data.addRows(this.computeCalendarChartRows(this.timelineData));
+      //   data.addRows(this.computeCalendarChartRows(this.timelineData));
 
-        let calendarDataColor, noDataColor, noDataBackgroundColor, calendarWidth, calendarWidthAdjustFactor;
-        ({ calendarDataColor, noDataColor, noDataBackgroundColor, calendarWidth, calendarWidthAdjustFactor } = this.chartMainStyles);
+      //   let calendarDataColor, noDataColor, noDataBackgroundColor, calendarWidth, calendarWidthAdjustFactor;
+      //   ({ calendarDataColor, noDataColor, noDataBackgroundColor, calendarWidth, calendarWidthAdjustFactor } = this.chartMainStyles);
 
-        const cellSize = Math.round((calendarWidthAdjustFactor * calendarWidth - 20.3)/55.8);
-        const calendarHeight = 1.1 * (17.9 * cellSize + 29.9);
+      //   const cellSize = Math.round((calendarWidthAdjustFactor * calendarWidth - 20.3)/55.8);
+      //   const calendarHeight = 1.1 * (17.9 * cellSize + 29.9);
 
-        let options = {
-          // title: "Dias da semana",
-          // height: 350,
-          // width: 1200,
-          /*
-          16 - 908 317
-          15 - 860 297
-          14 - 804 281
-          09 - 521 191
-          calendarWidth = 55.8*cellSize + 20.3
-          cellSize = (calendarWidth - 20.3)/55.8 
-          calendarHeight = 17.9*cellSize + 29.9
-          */
-          width: calendarWidth,
-          height: calendarHeight,
-          calendar: { cellSize: cellSize }, 
-          legend: 'none',
-          colorAxis: {minValue: 0, colors: [calendarDataColor, calendarDataColor]},
-          noDataPattern: {
-            backgroundColor: noDataBackgroundColor,
-            color: noDataColor
-          }          
-        };
+      //   let options = {
+      //     // title: "Dias da semana",
+      //     // height: 350,
+      //     // width: 1200,
+      //     /*
+      //     16 - 908 317
+      //     15 - 860 297
+      //     14 - 804 281
+      //     09 - 521 191
+      //     calendarWidth = 55.8*cellSize + 20.3
+      //     cellSize = (calendarWidth - 20.3)/55.8 
+      //     calendarHeight = 17.9*cellSize + 29.9
+      //     */
+      //     width: calendarWidth,
+      //     height: calendarHeight,
+      //     calendar: { cellSize: cellSize }, 
+      //     legend: 'none',
+      //     colorAxis: {minValue: 0, colors: [calendarDataColor, calendarDataColor]},
+      //     noDataPattern: {
+      //       backgroundColor: noDataBackgroundColor,
+      //       color: noDataColor
+      //     }          
+      //   };
 
-        return { data, options };
-      }
+      //   return { data, options };
+      // }
 
-      prepareScatterChart() {
-        // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
-        let data = new google.visualization.DataTable();
-        data.addColumn({ type: 'date', id: 'Date' });
-        data.addColumn({ type: 'timeofday', id: 'Time' });
+      // prepareScatterChart() {
+      //   // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
+      //   let data = new google.visualization.DataTable();
+      //   data.addColumn({ type: 'date', id: 'Date' });
+      //   data.addColumn({ type: 'timeofday', id: 'Time' });
 
-        let chartWidth, dataColor;
-        ({ chartWidth, dataColor } = this.chartMainStyles);
+      //   let chartWidth, dataColor;
+      //   ({ chartWidth, dataColor } = this.chartMainStyles);
 
-        let options = {
-          chart: {
-            title: 'Frequency',
-            subtitle: 'and time'
-          },
-          colors:[dataColor],
-          // width: 800,
-          // height: 150,
-          series: {
-            0: {axis: 'time'},
-            1: {axis: 'final grade'}
-          },
-          axes: {
-            y: {
-              'time': {label: 'Time'},
-              'final grade': {label: 'Final Exam Grade'}
-            }
-          },
-        };
+      //   let options = {
+      //     chart: {
+      //       title: 'Frequency',
+      //       subtitle: 'and time'
+      //     },
+      //     colors:[dataColor], 
+      //     // width: 300,         
+      //     // height: 150,
+      //     series: {
+      //       0: {axis: 'time'},
+      //       1: {axis: 'final grade'}
+      //     },
+      //     axes: {
+      //       y: {
+      //         'time': {label: 'Time'},
+      //         'final grade': {label: 'Final Exam Grade'}
+      //       }
+      //     },
+      //   };
 
-        const rows = this.computeScatterChartRows(this.timelineData);
-        console.log(rows);
-        data.addRows(rows);
+      //   const rows = this.computeScatterChartRows(this.timelineData);
+      //   console.log(rows);
+      //   data.addRows(rows);
 
-        return { data, options };
-      }
+
+      //   return { data, options };
+      // }
 
       prepareTraditionalScatterChart() {
         // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
         let data = new google.visualization.DataTable();
         data.addColumn({ type: 'date', id: 'Date' });
-		    data.addColumn({type: 'string', role: 'annotation'});
-    		data.addColumn({type: 'string', role: 'annotationText'});
+        data.addColumn({type: 'string', role: 'annotation'});
+        data.addColumn({type: 'string', role: 'annotationText'});
         data.addColumn({ type: 'timeofday', id: 'Time' });
 
         const rows = this.computeScatterChartRowsWithMondays(this.timelineData);
@@ -313,30 +310,30 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         return { data, options };
       }
 
-      computeCalendarChartRows(timelineData) {
-        const rows = this.timelineData
-        .map((tdata, index) => [ 
-          new Date(tdata.datetime), 
-          this._timeToNumberScale(tdata.time),
-          `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
-        ]);
-        // console.log(JSON.stringify(rows));
-        return rows;
-      }
+      // computeCalendarChartRows(timelineData) {
+      //   const rows = this.timelineData
+      //   .map((tdata, index) => [ 
+      //     new Date(tdata.datetime), 
+      //     this._timeToNumberScale(tdata.time),
+      //     `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
+      //   ]);
+      //   // console.log(JSON.stringify(rows));
+      //   return rows;
+      // }
 
-      computeScatterChartRows(timelineData) {
-        const rows = this.timelineData
-          .map((tdata, index) => [ 
-            new Date(tdata.datetime), 
-            this._timeOfDay(tdata.datetime)
-            // `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
-          ]);
+      // computeScatterChartRows(timelineData) {
+      //   const rows = this.timelineData
+      //     .map((tdata, index) => [ 
+      //       new Date(tdata.datetime), 
+      //       this._timeOfDay(tdata.datetime)
+      //       // `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
+      //     ]);
 
 
 
-        console.log(JSON.stringify(rows));
-        return rows;
-      }
+      //   console.log(JSON.stringify(rows));
+      //   return rows;
+      // }
 
       computeScatterChartRowsWithMondays(timelineData) {
         const mondays = this._buildMondaysData(timelineData);
