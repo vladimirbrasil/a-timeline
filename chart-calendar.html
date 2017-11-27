@@ -15,7 +15,7 @@
       div {
         margin: 5px 0;
       }
-      
+
       #calendar_chart_div {
         width: 100%;
       }
@@ -58,6 +58,7 @@
       }
 
       computeYears(timelineData) {
+        if (!timelineData || !timelineData[0]) return;        
         const years = timelineData.map((tdata) => tdata.datetime.getFullYear());
         console.log(years);
         const firstYear = Math.min(...years);
