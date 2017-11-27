@@ -144,8 +144,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
 
       computeChartMainStyles(hostWidth) {
         // dimensions
-        const chartWidth = (hostWidth > 1200) ? 1200 : Math.round(hostWidth);
-
+        const chartWidth = (hostWidth > 1200) ? 1200 : Math.round(hostWidth) - 15;
+        
 
         //colors
         let mainColor, lightMainColor;
