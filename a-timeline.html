@@ -1,6 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="chart-calendar.html">
 <link rel="import" href="chart-scatter.html">
 <!-- 
@@ -39,6 +42,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         --timeline-text-color: var(--default-primary-color, grey);
         --timeline-main-color: var(--dark-primary-color, #4286f4);
         --timeline-light-color: var(--light-primary-color, #d6e5ff);
+        --paper-tab-ink: var(--timeline-light-color, #4286f4);
+        --paper-tabs-selection-bar-color: var(--timeline-main-color, #d6e5ff);
       }
 
       #timeline {
@@ -62,11 +67,27 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       }
     </style>
 
+<paper-tabs selected="{{selected}}">
+  <paper-tab>Weekdays</paper-tab>
+  <paper-tab>Frequency</paper-tab>
+  <!-- <paper-tab>ITEM THREE</paper-tab> -->
+</paper-tabs>
+
+<iron-pages selected="{{selected}}">
+  <div>
+    <chart-calendar chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-calendar>        
+  </div>
+  <div>
+      <chart-scatter chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-scatter>    
+  </div>
+  <!-- <div>Three</div> -->
+</iron-pages>
+
     <div id="timeline">
       <!-- [[jsonStringify(timelineData)]] -->
       <!-- <div id="scatter_chart_div"></div>   -->
-      <chart-scatter chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-scatter>    
-      <chart-calendar chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-calendar>    
+      <!-- <chart-scatter chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-scatter>    
+      <chart-calendar chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-calendar>     -->
       <!-- <div id="calendar_chart_div"></div>       -->
     </div>
     <!-- <div id="timeline">
@@ -101,7 +122,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       static get is() { return 'a-timeline'; }
       static get observers() {
         return [
-          'dataLoaded(timelineData, chartMainStyles)'
+          'dataLoaded(timelineData, chartMainStyles)',
+          'selChanged(selected)',
         ];
       }
       static get properties() {
@@ -109,6 +131,10 @@ Edit `<a-timeline>` color using `--timeline-color` style.
           /**
           * Array of datetimes to be plotted.
           */
+          selected: {
+            type: Number,
+            value: 0,
+          },
           datetimes: {
             type: Array,
             value: null,
@@ -141,6 +167,11 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         this.set('hostWidth', this.offsetWidth);
         console.log(this.hostWidth);
       }
+
+      selChanged(selected) {
+        this.set('hostWidth', this.offsetWidth);
+        console.log(this.hostWidth);
+      }      
 
       computeChartMainStyles(hostWidth) {
         // dimensions
