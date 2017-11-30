@@ -1,0 +1,59 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="my-icons.html">
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+<dom-module id="chart-scatter-controls">
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply --chart-scatter-controls-mixin;
+        --chart-scatter-controls-text-color: var(--default-primary-color, grey);
+        --chart-scatter-controls-main-color: var(--dark-primary-color, '#4286f4');
+        --chart-scatter-controls-light-color: var(--light-primary-color, '#d6e5ff');
+      }
+
+      div {
+        margin: 5px 0;
+      }
+    </style>
+
+    <div id="expand">
+      <!-- <paper-toggle-button checked="{{expanded}}">[[expandOrShrink]]</paper-toggle-button> -->
+      <paper-icon-button id="expandBtn" on-tap="toggleExpand" icon="{{_icon(expanded)}}"></paper-icon-button>
+    </div>
+
+  </template>
+
+  <script>
+    class ChartScatterControls extends Polymer.Element {
+      static get is() { return 'chart-scatter-controls'; }
+      static get properties() {
+        return {
+          expanded: {
+            type: Boolean,
+            value: false,
+            notify: true,
+          },
+          fullscreen: {
+            type: Boolean,
+            value: false,
+            notify: true,
+          },
+        };
+      }
+
+      toggleExpand() {
+        this.set('expanded', !this.expanded);
+      }
+
+      _icon(expanded) {
+        return expanded ? 'myicons:keyboard-arrow-down' : 'myicons:keyboard-arrow-up';
+      }
+    }
+
+    window.customElements.define(ChartScatterControls.is, ChartScatterControls)
+  </script>
+</dom-module>

@@ -6,6 +6,8 @@
 <link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="chart-calendar.html">
 <link rel="import" href="chart-scatter.html">
+<link rel="import" href="chart-scatter-controls.html">
+<link rel="import" href="chart-traditionalscatter.html">
 <!-- 
 `<a-timeline>` plots your dates.
 
@@ -46,12 +48,12 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         --paper-tabs-selection-bar-color: var(--timeline-main-color, #d6e5ff);
       }
 
-      #timeline {
+      /* #timeline {
         width: 100%;
         height: 20%;
         min-height: 50px;
         margin-bottom: 50px;
-      }
+      } */
 
       #calendar_chart_div, #scatter_chart_div {
         width: 100%;
@@ -70,7 +72,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
 <paper-tabs selected="{{selected}}">
   <paper-tab>Weekdays</paper-tab>
   <paper-tab>Frequency</paper-tab>
-  <!-- <paper-tab>ITEM THREE</paper-tab> -->
+  <paper-tab>Frequency with mondays</paper-tab>
 </paper-tabs>
 
 <iron-pages selected="{{selected}}">
@@ -78,9 +80,19 @@ Edit `<a-timeline>` color using `--timeline-color` style.
     <chart-calendar chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-calendar>        
   </div>
   <div>
-      <chart-scatter chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]"></chart-scatter>    
+    <chart-scatter-controls expanded="{{expanded}}" fullscreen="{{fullscreen}}"></chart-scatter-controls>
+    <chart-scatter 
+    expanded="[[expanded]]" fullscreen="[[fullscreen]]"
+    chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]">
+  </chart-scatter>    
   </div>
-  <!-- <div>Three</div> -->
+  <div>
+    <chart-scatter-controls expanded="{{expandedTrad}}" fullscreen="{{fullscreen}}"></chart-scatter-controls>
+    <chart-traditionalscatter
+        expanded="[[expandedTrad]]" fullscreen="[[fullscreen]]"
+        chart-main-styles="[[chartMainStyles]]" timeline-data="[[timelineData]]">
+    </chart-traditionalscatter>        
+  </div>
 </iron-pages>
 
     <div id="timeline">
@@ -122,8 +134,8 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       static get is() { return 'a-timeline'; }
       static get observers() {
         return [
-          'dataLoaded(timelineData, chartMainStyles)',
-          'selChanged(selected)',
+          // 'dataLoaded(timelineData, chartMainStyles)',
+          // 'selChanged(selected)',
         ];
       }
       static get properties() {
@@ -168,10 +180,10 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         console.log(this.hostWidth);
       }
 
-      selChanged(selected) {
-        this.set('hostWidth', this.offsetWidth);
-        console.log(this.hostWidth);
-      }      
+      // selChanged(selected) {
+      //   this.set('hostWidth', this.offsetWidth);
+      //   console.log(this.hostWidth);
+      // }      
 
       computeChartMainStyles(hostWidth) {
         // dimensions
@@ -197,7 +209,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         const timelineData = datetimes
           .map(dt => this._toDateTime(dt))
           .map((dt, index) => {
-            console.log(dt)
+            // console.log(dt)
             return {
               datetime: dt,
               weekday: this._getWeekDay(dt),

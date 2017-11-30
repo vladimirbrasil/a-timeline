@@ -1,5 +1,4 @@
 <link rel="import" href="bower_components/polymer/polymer-element.html">
-<link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
 <!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
 
 <dom-module id="chart-scatter">
@@ -17,21 +16,18 @@
         margin: 5px 0;
       }
 
-      #scatter_chart_div {
+      #chart_div {
         width: 100%;
       }
       @media screen and (min-width: 1200px) {
-        #scatter_chart_div, #scatter_chart_div {
+        #chart_div {
           width: 1200px;
         }
       }
     </style>
 
-    <div id="expand">
-      <paper-toggle-button checked="{{expandChart}}">Expandir</paper-toggle-button>
-    </div>
-    <div id="scatter_chart_div"></div>      
-
+    <div id="chart_div"></div>      
+    
   </template>
 
   <script>
@@ -39,11 +35,19 @@
       static get is() { return 'chart-scatter'; }
       static get observers() {
         return [
-          'dataLoaded(chartRows, chartMainStyles, expandChart)',
+          'dataLoaded(chartRows, chartMainStyles, expanded, fullscreen)',
         ];
       }
       static get properties() {
         return {
+          expanded: {
+            type: Boolean,
+            value: false,
+          },
+          fullscreen: {
+            type: Boolean,
+            value: false,
+          },
           timelineData: {
             type: Array,
           },
@@ -57,25 +61,21 @@
         };
       }
 
-      expandChartChanged(expandChart) {
-        this.chartMainStyles.height
-      }
-
-      dataLoaded(chartRows, chartMainStyles, expandChart) {
+      dataLoaded(chartRows, chartMainStyles, expanded, fullscreen) {
         if (!chartRows || !chartRows[0] || !chartMainStyles) return
 
         google.charts.load('current', {'packages':['scatter']});
         google.charts.setOnLoadCallback(() => {
 
           let data, options;
-          ({ data, options } = this.prepareChart(chartRows, chartMainStyles, expandChart));
+          ({ data, options } = this.prepareChart(chartRows, chartMainStyles, expanded, fullscreen));
 
-          var chart = new google.charts.Scatter(this.$.scatter_chart_div);
+          var chart = new google.charts.Scatter(this.$.chart_div);
           chart.draw(data, google.charts.Scatter.convertOptions(options));
         });
       }
 
-      prepareChart(chartRows, chartMainStyles, expandChart) {
+      prepareChart(chartRows, chartMainStyles, expanded, fullscreen) {
         // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
         let data = new google.visualization.DataTable();
         data.addColumn({ type: 'date', id: 'Date' });
@@ -90,6 +90,7 @@
             // subtitle: 'and time'
           },
           colors:[dataColor], 
+          width: chartWidth,
           // width: 300,         
           // height: 400,
           series: {
@@ -102,10 +103,13 @@
           },
         };
 
-        options.height = expandChart ? 400 : 70;
+        if (fullscreen) {
+        } else {
+          options.height = expanded ? 400 : 70;
+        }
 
         const rows = chartRows;
-        console.log(rows);
+        // console.log(rows);
         data.addRows(rows);
 
 
@@ -117,12 +121,12 @@
         if (!timelineData || !timelineData[0]) return;
         const rows = this.timelineData
           .map((tdata, index) => [ 
-            new Date(tdata.datetime), 
+            tdata.datetime, 
             this._timeOfDay(tdata.datetime)
             // `${tdata.formattedDate} (${tdata.weekday}) ${tdata.time}`
           ]);
 
-        console.log(JSON.stringify(rows));
+        // console.log(JSON.stringify(rows));
         return rows;
       }
 
@@ -141,7 +145,7 @@
         var hoursMinutes = time.split(/[.:]/);
         var hours = parseInt(hoursMinutes[0], 10);
         var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
-        console.log([ hours, minutes, 0 ])
+        // console.log([ hours, minutes, 0 ])
         return [ hours, minutes, 0 ];
 
         function addTimezone(datetime) {

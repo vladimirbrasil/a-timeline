@@ -1,0 +1,224 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+
+<dom-module id="chart-traditionalscatter">
+  <template>
+    <style>
+      :host {
+        display: block;
+        @apply --chart-traditionalscatter-mixin;
+        --chart-traditionalscatter-text-color: var(--default-primary-color, grey);
+        --chart-traditionalscatter-main-color: var(--dark-primary-color, '#4286f4');
+        --chart-traditionalscatter-light-color: var(--light-primary-color, '#d6e5ff');
+      }
+
+      div {
+        margin: 5px 0;
+      }
+
+      #chart_div {
+        width: 100%;
+      }
+      @media screen and (min-width: 1200px) {
+        #chart_div {
+          width: 1200px;
+        }
+      }
+    </style>
+
+    <div id="chart_div"></div>      
+    
+  </template>
+
+  <script>
+    class ChartTraditionalscatter extends Polymer.Element {
+      static get is() { return 'chart-traditionalscatter'; }
+      static get observers() {
+        return [
+          'dataLoaded(chartRows, chartMainStyles, expanded, fullscreen)',
+        ];
+      }
+      static get properties() {
+        return {
+          expanded: {
+            type: Boolean,
+            value: false,
+          },
+          fullscreen: {
+            type: Boolean,
+            value: false,
+          },
+          timelineData: {
+            type: Array,
+          },
+          chartMainStyles: {
+            type: Object,
+          },
+          chartRows: {
+            type: Array,
+            computed: 'computeChartRows(timelineData)',
+          },
+        };
+      }
+
+      dataLoaded(chartRows, chartMainStyles, expanded, fullscreen) {
+        if (!chartRows || !chartRows[0] || !chartMainStyles) return
+
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(() => {
+
+          let data, options;
+          ({ data, options } = this.prepareChart(chartRows, chartMainStyles, expanded, fullscreen));
+
+          var chart = new google.visualization.ScatterChart(this.$.chart_div);
+          chart.draw(data, options);
+        });
+      }
+
+      prepareChart(chartRows, chartMainStyles, expanded, fullscreen) {
+        // https://developers.google.com/chart/interactive/docs/gallery/scatterchart
+        let data = new google.visualization.DataTable();
+        data.addColumn({ type: 'date', id: 'Date' });
+        data.addColumn({type: 'string', role: 'annotation'});
+        data.addColumn({type: 'string', role: 'annotationText'});
+        data.addColumn({ type: 'timeofday', id: 'Time' });
+
+        // const rows = this.computeScatterChartRowsWithMondays(this.timelineData);
+        // console.log(rows);
+        // data.addRows(rows);
+
+        let chartWidth, dataColor;
+        ({ chartWidth, dataColor } = chartMainStyles);
+
+        let options = {
+          width: chartWidth,
+          // title: 'Freqüência e horários',
+          // hAxis: {title: 'Age', minValue: 0, maxValue: 15},
+          // vAxis: {title: 'Weight', minValue: 0, maxValue: 15},
+          // colors:[dataColor], 
+          legend: 'none',
+          theme: 'maximized',
+          vAxis: {
+            // viewWindowMode: 'maximized',
+          },
+          annotations: {
+              style: 'line'
+          },
+          trendlines: {
+            0: {
+              type: 'linear',
+              color: dataColor,
+              lineWidth: 3,
+              opacity: 0.3,
+              showR2: true,
+              visibleInLegend: true
+            }
+          },
+        };
+
+        if (fullscreen) {
+        } else {
+          options.height = expanded ? 400 : 70;
+        }
+
+        const rows = chartRows;
+        // console.log(rows);
+        data.addRows(rows);
+
+        return { data, options };
+      }
+
+
+      computeChartRows(timelineData) {
+        if (!timelineData || !timelineData[0]) return;
+        const mondays = this._buildMondaysData(timelineData);
+        const mondaysRows = mondays.map((mondayDate) => [ mondayDate, '', 'monday', null ]);
+        // console.log(mondaysRows);
+        const rows = this.timelineData
+          .map((tdata, index) => [ 
+            new Date(tdata.datetime),
+            null, null, 
+            this._timeOfDay(tdata.datetime)
+          ]);
+        // console.log(rows);
+
+        const allRows = rows.concat(mondaysRows);
+        // console.log(allRows);
+        return allRows;
+      }
+
+
+      _buildMondaysData(timelineData) {
+        if (!timelineData || !timelineData[0]) return [];        
+        const todayTimezoneDiff = new Date().getTimezoneOffset();
+        return timelineData.map((tdata) => {
+          const datetime = tdata.datetime;
+          let timezoneDiff = new Date(datetime).getTimezoneOffset();
+          let timezoneCorrection = (timezoneDiff - todayTimezoneDiff)*60*1000;
+          const mondayBefore = getMonday(datetime); 
+          const mondayBeforeCorrected = new Date(mondayBefore.getTime() + timezoneCorrection)
+          return mondayBeforeCorrected;
+        });
+        
+        //old method: build all mondays between dates - too many lines.
+        const firstDay = timelineData[0].datetime;
+        const firstMonday = getMonday(firstDay); 
+        // console.log(firstDay, firstMonday)
+
+        const lastDay = timelineData[timelineData.length-1].datetime;
+        const lastDayNextWeek = new Date(lastDay.getTime() + 6*24*60*60*1000);
+        const lastMonday = getMonday(lastDayNextWeek); //(lastDay) 
+        // console.log(lastDay, lastMonday)
+
+        let n = firstMonday.getTime();
+        let mondays = [];
+        while (n <= lastMonday.getTime()) {
+          let timezoneDiff = new Date(n).getTimezoneOffset();
+          let timezoneCorrection = (timezoneDiff - todayTimezoneDiff)*60*1000;
+          // console.log(timezoneDiffInMillis);
+          mondays.push(new Date(n + timezoneCorrection));
+          n += 7*24*60*60*1000;          
+        }
+
+        // console.log(mondays)
+        return mondays;
+
+        function getMonday(d) {
+        // https://stackoverflow.com/questions/4156434/javascript-get-the-first-day-of-the-week-from-current-date
+          d = new Date(d);
+          var day = d.getDay(),
+              diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+          return new Date(d.setDate(diff));
+        }
+      }
+
+      _getTime(date) {
+        return date.toLocaleString('pt-BR').substring(11,16).trim();
+      }
+
+      _timeOfDay(datetime) {
+        //timeOfDay needs timezone correction (bug!)
+        const plusTimezoneDate = addTimezone(datetime);
+
+        // console.log(plusTimezoneDate, time);
+        const time = this._getTime(plusTimezoneDate);
+
+        //now format time already corrected with timezone
+        var hoursMinutes = time.split(/[.:]/);
+        var hours = parseInt(hoursMinutes[0], 10);
+        var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
+        // console.log([ hours, minutes, 0 ])
+        return [ hours, minutes, 0 ];
+
+        function addTimezone(datetime) {
+          const d = new Date(datetime);
+          const timezone = d.getTimezoneOffset();
+          return new Date(d.getTime() + timezone * 60 * 1000);
+        }
+      }
+
+    }
+
+    window.customElements.define(ChartTraditionalscatter.is, ChartTraditionalscatter)
+  </script>
+</dom-module>

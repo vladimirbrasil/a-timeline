@@ -16,17 +16,17 @@
         margin: 5px 0;
       }
 
-      #calendar_chart_div {
+      #chart_div {
         width: 100%;
       }
       @media screen and (min-width: 1200px) {
-        #calendar_chart_div, #scatter_chart_div {
+        #chart_div {
           width: 1200px;
         }
       }
     </style>
 
-    <div id="calendar_chart_div"></div>      
+    <div id="chart_div"></div>      
 
   </template>
 
@@ -60,10 +60,10 @@
       computeYears(timelineData) {
         if (!timelineData || !timelineData[0]) return;        
         const years = timelineData.map((tdata) => tdata.datetime.getFullYear());
-        console.log(years);
+        // console.log(years);
         const firstYear = Math.min(...years);
         const lastYear = Math.max(...years);
-        console.log(lastYear - firstYear);
+        // console.log(lastYear - firstYear);
         return 1 + lastYear - firstYear;
       }
 
@@ -76,7 +76,7 @@
           let data, options;
 
           ({ data, options } = this.prepareChart(chartRows, chartMainStyles));
-          var chart = new google.visualization.Calendar(this.$.calendar_chart_div);
+          var chart = new google.visualization.Calendar(this.$.chart_div);
           chart.draw(data, options);        
         });
       }
@@ -133,8 +133,8 @@
             color: lightColor,
           }          
         };
-        console.log(this.chartMainStyles)
-        console.log(data, options)
+        // console.log(this.chartMainStyles)
+        // console.log(data, options)
         return { data, options };
       }
 
