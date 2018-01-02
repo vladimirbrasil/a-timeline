@@ -34,36 +34,47 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         @apply --timeline-mixin;
         --timeline-color: var(--default-primary-color, grey);
         --timeline-text-color: var(--default-primary-color, grey);
+        --timeline-circle-diameter: 20px;
+        --timeline-line-width: 6px;
       }
 
       #timeline {
+        margin-top:     calc(1em +  var(--timeline-circle-diameter) / 2);
+        margin-bottom:  calc(3em +  var(--timeline-circle-diameter) / 2);
         width: 100%;
-        height: 20%;
+        /* height: calc(var(--timeline-circle-diameter) + 20px + 5em); */
+        /* height: 20%; */
         min-height: 50px;
-        margin-bottom: 50px;
       }
 
       #line {
-        height: 6px;
+        height: var(--timeline-line-width);
         width: 90%;
         background: var(--timeline-color);
-        border-radius: 5px;
+        border-radius: calc(var(--timeline-line-width) - (1/14)*1em);
         margin: auto;
-        margin-right: 40px;
+        /* margin-left: calc(var(--timeline-circle-diameter) / 2);
+        margin-right: calc(var(--timeline-circle-diameter) / 2); */
         top: 50%;
         /* transform: translateY(-50%); */
         position: relative;
       }
 
+      .circle,
+      details {
+        position: absolute;
+      }
+
       .circle {
         box-sizing: border-box;
-        width: 20px;
-        height: 20px;
+        width: var(--timeline-circle-diameter);
+        height: var(--timeline-circle-diameter);
+        /* background: transparent; */
         background: var(--timeline-color);
-        border-radius: 15px;
+        border-radius: calc(var(--timeline-circle-diameter) - (5/14)*1em);
         position: absolute;
-        top: -7px;
-        border: 3px solid var(--timeline-color);
+        top: calc(-1 * (var(--timeline-circle-diameter) - var(--timeline-line-width)) / 2);
+        border: calc((3/14)*1em) solid var(--timeline-color);
       }
 
       .circle.hasdetails {
@@ -73,34 +84,49 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       details {
         display: block;
         color: var(--timeline-color);
+        top: calc((-8/14)*1em + var(--timeline-line-width) / 2);
+        /* left: calc(var(--timeline-circle-diameter) / 2); */
       }
 
-      summary {
+      .summary {
         display: block;
-        margin-top: 0px;
+        margin-top: calc((2/14)*1em + var(--timeline-circle-diameter) / 3);
         outline: none;
+        color: transparent;
+        background-color: transparent;
       }
+
+      .text {
+        color: var(--timeline-text-color);
+      }
+
       .day {
+        margin-left: calc(-1 * (7/14)*1em);
         display: block;
-        margin-top: 5px;
+        /* margin-top: 0px; */
+        margin-top: calc(var(--timeline-circle-diameter) / 2);
       }
+
+      .month {
+        margin-left: calc(-1 * var(--timeline-circle-diameter) / 2);
+        position: absolute;
+        /* margin-top: -58px; */
+        margin-top: calc(-1 * (1em + (12/14)*1em + var(--timeline-circle-diameter) + (10/14)*1em + 1em - (3/14)*1em))
+        /* margin-top: calc(-1 * (1em + 2px)); */
+      }
+
       .detail {
         display: block;
         margin-top: 0px;
       }
-      .month {
-        position: absolute;
-        margin-top: -58px;
-      }
-      .text {
-        color: var(--timeline-text-color);
-      }
+
     </style>
 
     <div id="timeline">
-      <div id="line">            
+      <div id="line">
         <template is="dom-repeat" items="[[timelineData]]">
-          <details id="details" class$="[[_computeTimelineClass(hasDetails)]]" style$="[[_computeTimelineItemStyle(item)]]">
+          <div class="circle" style$="[[_computeTimelineItemStyle(item)]]"></div>
+          <details id="details" class$="[[_computeTimelineClass(hasDetails)]]" style$="[[_computeTimelineItemStyleCentered(item)]]">
             <summary>
               <div class="text day">[[item.day]]</div>
               <div class="text month">[[item.newMonth]]</div>
@@ -111,8 +137,10 @@ Edit `<a-timeline>` color using `--timeline-color` style.
             </template>
           </details>
         </template>
-      </div>  <!-- end line -->
-    </div>  <!-- end timeline -->
+      </div>
+      <!-- end line -->
+    </div>
+    <!-- end timeline -->
 
 
     <!-- <template is="dom-repeat" items="[[timelineData]]">
@@ -192,7 +220,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
               newMonth: this._computeNewMonth(sortedDatetimes, index) ? this._getFormattedMonth(dt) : null,
             }
           });
-        return timelineData;        
+        return timelineData;
       }
 
       computeFirstDate(sortedDatetimes) {
@@ -205,13 +233,13 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       computeTotalDaysDiff(sortedDatetimes) {
         if (!sortedDatetimes || !sortedDatetimes[0]) return;
         const firstDate = this.computeFirstDate(sortedDatetimes);
-        const lastDate = this._toDateTime(sortedDatetimes[sortedDatetimes.length-1]);
+        const lastDate = this._toDateTime(sortedDatetimes[sortedDatetimes.length - 1]);
 
         return this._computeDaysDiff(firstDate, lastDate);
       }
 
       _computeDaysDiff(firstDate, lastDate) {
-        if (!lastDate || !firstDate) return;        
+        if (!lastDate || !firstDate) return;
         const notimeFirstDate = this._removeTime(firstDate);
         const notimeLastDate = this._removeTime(lastDate);
         const timeDiff = Math.abs((new Date(notimeLastDate)).getTime() - (new Date(notimeFirstDate)).getTime());
@@ -224,11 +252,16 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       }
 
       _computeTimelineClass(hasDetails) {
-        return `circle ${hasDetails ? ' hasdetails' : ''}`;
+        return `${hasDetails ? ' hasdetails' : ''}`;
       }
 
       _computeTimelineItemStyle(item) {
+        // return `left: ${this._calcRelativeDiff(item)}%;`;
+        return `left: calc(${this._calcRelativeDiff(item)}% - (var(--timeline-circle-diameter) / 2));`;
+      }
+      _computeTimelineItemStyleCentered(item) {
         return `left: ${this._calcRelativeDiff(item)}%;`;
+        // return `left: calc(${this._calcRelativeDiff(item)}% + (var(--timeline-circle-diameter) / 2));`;
       }
 
       _calcRelativeDiff(item) {
@@ -239,7 +272,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
       _computeNewMonth(sortedDatetimes, index) {
         if (index === 0) return true;
         const datetime = sortedDatetimes[index];
-        const beforeDatetime = sortedDatetimes[index-1];
+        const beforeDatetime = sortedDatetimes[index - 1];
         return datetime.getMonth() !== beforeDatetime.getMonth();
       }
 
@@ -249,7 +282,7 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         var options = { month: 'long' };
         const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
-        return dateFormat.format(date);        
+        return dateFormat.format(date);
       }
 
       _toDateTime(date) {
@@ -262,17 +295,17 @@ Edit `<a-timeline>` color using `--timeline-color` style.
         // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         var options = { day: '2-digit' };
         const dateFormat = new Intl.DateTimeFormat(window.navigator.language, options);
-        return dateFormat.format(date);        
+        return dateFormat.format(date);
       }
 
       _getTime(date) {
-        return date.toLocaleString('pt-BR').substring(11,16).trim();
+        return date.toLocaleString('pt-BR').substring(11, 16).trim();
       }
 
       _getWeekDay(date) {
         //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DateTimeFormat
-        const weekdayFormat = new Intl.DateTimeFormat(window.navigator.language, { 
-          weekday: 'short', 
+        const weekdayFormat = new Intl.DateTimeFormat(window.navigator.language, {
+          weekday: 'short',
         });
         return weekdayFormat.format(date).toLocaleLowerCase();
       }
