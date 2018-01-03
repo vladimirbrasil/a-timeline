@@ -1,35 +1,25 @@
-# https://medium.com/collaborne-engineering/how-to-build-polymer-components-with-github-and-travis-67683ef8bf0d
-# https://github.com/Collaborne/d3-progress-meter/blob/master/.travis.yml
-
-dist: trusty
-sudo: false
-group: beta
-
 language: node_js
-node_js:
-- node
+node_js: stable
+dist: trusty
+sudo: required
 addons:
-  firefox: latest-esr
-cache:
-  directories:
-  - node_modules
-  - "$HOME/.cache/bower"
+  firefox: latest
+  sauce_connect: true
+  apt:
+    sources:
+    - google-chrome
+    packages:
+    - google-chrome-stable
 before_install:
-- "if [ -d node_modules ] && [ x$(cat node_modules/.last-node-version 2>/dev/null) != x$(node -e 'console.log(process.version)') ]; then npm rebuild --update-binary && node -e 'console.log(process.version)' > node_modules/.last-node-version; fi"
+- export TZ=America/Sao_Paulo
 before_script:
-- npm install web-component-tester bower
-# - npm install web-component-tester bower polylint
-- $(npm bin)/bower install
-# - $(npm bin)/polylint --no-recursion
+- npm install -g bower web-component-tester
+- bower install
 script:
-- xvfb-run $(npm bin)/wct
-
-# Coverage steps
-# - npm run coverage
-# after_success: 'npm run coveralls'
-  # Last travis error
-  # node node_modules/.bin/istanbul cover _mocha -- -R spec
-  # No test files found
-  # No coverage information was collected, exit without writing coverage information
-  # Coverage  https://www.gregjs.com/javascript/2016/how-to-get-a-shiny-coverage-badge-for-your-github-project/
-  #           https://github.com/rcosnita/polymer-karma-example
+- xvfb-run wct --skip-plugin sauce
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then wct --skip-plugin local -s 'default';
+  fi
+env:
+  global:
+  - secure: ZzRhciaxVPiyuVFxT4t0vBg/kBqlM3ww1ASSotq1QT6C/ccX+gHOBbw52dyxWiSeUzx5pNspq0RHaWh7i5UzekqVQ8mF4cKFzVjlXCwg0wFZBAhI5zygXR2FCCqLvfzi5C3jFVfydVLKLpzMsUPIj+MrMgb/t+0Zc1Z/kbOgMaY/E+gNCg0SSgO1fx0eXbQyctzqLT4blot+rZRuiccKTIQ9olRydRQpromEx3R00uM3XDfW9gB6fcHB0yBU01WlEcVmucGFydykbpdbCu6JyUQesyaPSEBCyJ2hW7WXvBMtvGGsCKC1HXVbHq9KAGw4RlXViiVZtT87JxBunm8BioGhq6Dvyw82qwCUnL/EhX16GyEubg6BpnSkyYTv4J79BlgtC0ZVr7+qNqcQSdoZNNc1/+UmzOJLYfX1o4dk/Yrx5sCyOskxA0AribTi/RX6BKZd1qPahQQ3gqXL0mhjNtlZ3eD3vDgH8yFzQ9vNq4voWETbWEOyRrJw9RhaGf0YouFPo1eyI+UALlJqoG2kOcEh5lxUvMnobc/Yy3u1j7WzjgoeJ4o4kFPU+sDvRa9Of7+bT6CcR525hVtQSgh6GAHtpZNsHpQzZlwuNkAt+FTiipf9RMleqWlI8wPYQjDqrPW54QDETT2re5PO8o6iiEnsvNoxJArnefgJUQGv+HQ=
+  - secure: fCLxbEtvE4caONLOjOBFgZ/M7cmsNDOPvQaTNoEuxFY1qWMdPkht9//MVFEi3uSDrWvBRPxLThiHBZWZxZ4E9GL+X1hAG2/nedXOpczgcALj/hEeTJN8+Fk6iDsmGcW4LOhm6KZpBBczbQUT1E8kdFCIcYQTK4HE+oRFf3EniCdGXQTjAkb8ffrPa+Hfjr8ip/zHCzDqlvhXwUndPbg1EMXPtWDP+pP3+nWN7X7VRue3gIwyGN/LwuF5Zv1jTWQzWid74g0gjmX0w/V3q+jmILOGULNWIDc41LDONmvxezeMZmXfLi/PQfWTgVGtPZZavNTSfjRAl4iNv3XkhaPD/7rg5jVb8sm1oqIlSVTIpgSCHFGFx+8/WE9A0mOcTNO9w4N7aiC6U6v26GTQl9mFrKXoqWqrUBhtkhj+EAUd+dul4R+lwqGgQIBAZUA8nvNQH7GqxkEt/VPQS744DSOD+m46C24oNxHXa/2BVNg9SVNH9pwnC3Yoqa50+vaFRfj+dSu5S2MdcatxxDFiIV9jXmrNyCfBUcuEIogjq9orE3j7JWgtrwqCFyi/JoDleaf+gJ9bMduE04Ifu+UmJOBUOk8hv2iHh5Gzlrx8WsgU+1iPircBy7xHOI7fOh+WzatndfjYJB0OYIUYJ+rQfmoIzZ65p1JepN/e6+mYYzaPNJU=
