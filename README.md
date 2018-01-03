@@ -34,7 +34,7 @@
 <script>
   window.addEventListener('WebComponentsReady', function() {
     Polymer({
-      is: 'time-glimpse',
+      is: 'a-timeline',
 
       connectedCallback: function() {
         var items = [];
