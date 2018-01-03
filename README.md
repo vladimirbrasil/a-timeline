@@ -26,27 +26,10 @@
 ```
 -->
 ```html
-<a-timeline id="demo"></a-timeline>
+<a-timeline id="demo" datetimes="[[datetimes]]"></a-timeline>
 <script>
   const datetimes = ['2017-08-11T14:17', '2017-08-07T16:00','2017-08-23T15:22', '2017-09-13T14:48'];
   document.getElementById('demo').datetimes = datetimes;
-</script>
-<script>
-  window.addEventListener('WebComponentsReady', function() {
-    Polymer({
-      is: 'a-timeline',
-
-      connectedCallback: function() {
-        var items = [];
-
-        for (var i = 0; i < 100; i++) {
-          items.push({firstName: 'First Name ' + i, lastName: 'Last Name ' + i});
-        }
-
-        this.items = items;
-      }
-    });
-  });
 </script>
 ```
 
